@@ -1,23 +1,40 @@
-import java.util.ArrayList;
-import java.util.Queue;
+import java.util.*;
 
 public class Clue {
     private String[] weapon_Names = {"Candlestick", "Dagger", "Lead Pipe", "Revolver", "Rope", "Spanner"};
+
     private String[] room_Names = {"Lounge", "Dining Room", "Kitchen", "Ballroom", "Conservatory",
             "Billiard Room", "Library", "Study Room", "Hall"};
+
     private String[] character_Names = {"Miss Scarlett", "Colonel Mustard", "Mrs White", "Mr Green",
             "Mrs Peacock", "Professor Plum"};
 
     private ArrayList<Weapon> weapons;
     private ArrayList<Room> rooms;
     private ArrayList<ClueCharacter> characters;
+
     private Suggestion suggestion;    //Cluedo.Suggestion changes every player so not final
+
+    private Solution gameSolution;
+
+    private static final Random randomize = new Random();
+
     ArrayList<Player> players;
     Queue<Player> playOrder;
     Card[][] board = new Card[24][25];
 
-    public Clue() {
+    private static final Scanner INPUT = new Scanner(System.in);
+
+    public Clue(int n) {
+        //SETUP
         loadGame();
+        allocatePlayers(); /** TO DO*/
+        makeSolution();
+        dealCards();
+        setPlayerLocations();  /** TO DO*/
+
+        //GAME PLAY CAN BEGIN
+
     }
 
     public void loadGame() {
@@ -28,6 +45,15 @@ public class Clue {
 
     public static void main(String[] a) {
 
+        //Welcome messege
+        System.out.println("********** CLUE **********");
+
+        // Getting number of players playing
+        System.out.println("How many players?");
+        int numberOfPlayers = validInputCheck( Integer.parseInt(INPUT.nextLine()) );
+
+        //NEW GAME
+        Clue clue = new Clue(numberOfPlayers);
 
         /**
          * TODO - Main Clue event loop
@@ -47,5 +73,66 @@ public class Clue {
          *
          *  That loop continues until all the players are gone or someone guesses correctly
          */
+
     }
+
+    static int validInputCheck(int i) {
+        while(true){
+            if(i < 7 && i > 1){
+                return i;
+            }
+            else {
+                System.out.println("Number of players must be between 2 and 6...");
+                return validInputCheck( Integer.parseInt(INPUT.nextLine()) );
+            }
+        }
+
+    }
+
+    public void allocatePlayers(){
+        /*TO DO
+        Players need to choose their characters
+        Update playOrder??
+        Decide who goes first??
+        */
+    }
+
+    public void makeSolution() {
+        // randomly choosing a murder weapon
+        Weapon w = weapons.remove(randomize.nextInt(weapons.size()));
+
+        // randomly choosing a murder room
+        Room r = rooms.remove(randomize.nextInt(rooms.size()));
+
+        // randomly choosing a murderer
+        ClueCharacter c = characters.remove(randomize.nextInt(characters.size()));
+
+        gameSolution = new Solution(w, r, c);
+    }
+
+    public void dealCards() {
+        ArrayList <Card> toDeal = new ArrayList<>();
+
+        //add all cards but solution cards to new deck
+        for(Weapon w : weapons) toDeal.add(w);
+        for(ClueCharacter c : characters) toDeal.add(c);
+        for(Room r : rooms) toDeal.add(r);
+
+        //shuffle said deck
+        Collections.shuffle(toDeal);
+
+        //deal between players
+        while(!toDeal.isEmpty()) {
+            for (Player p : players) {
+                p.addToHand(toDeal.get(toDeal.size()));
+                toDeal.remove(toDeal.size());
+            }
+        }
+
+    }
+
+    public void setPlayerLocations(){
+        //players position on board??
+    }
+
 }
